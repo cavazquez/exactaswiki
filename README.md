@@ -1,4 +1,4 @@
-# Exactas Wiki
+# 📚 Exactas Wiki
 
 > **Nota sobre la generación de código**  
 > El 99% del código de este proyecto fue generado automáticamente por Cascade, un asistente de IA desarrollado por Windsurf AI. Este modelo está basado en GPT-4 con capacidades mejoradas para desarrollo de software.
@@ -7,7 +7,7 @@
 
 Visualizador de apuntes y materiales de estudio organizados por carrera y tipo de examen.
 
-## Características
+## ✨ Características
 
 - Navegación por carpetas
 - Vista previa de archivos PDF
@@ -15,7 +15,7 @@ Visualizador de apuntes y materiales de estudio organizados por carrera y tipo d
 - Búsqueda y filtrado
 - Navegación con migas de pan
 
-## Estructura de Carpetas
+## 📁 Estructura de Carpetas
 
 ```
 /
@@ -29,7 +29,7 @@ Visualizador de apuntes y materiales de estudio organizados por carrera y tipo d
             └── finales/
 ```
 
-**Ejemplo de estructura real:**
+**📂 Ejemplo de estructura real:**
 ```
 materias/
 └── computacion/
@@ -46,15 +46,15 @@ materias/
         └── 2do-parcial/
             └── parcial-2-2023-07-05.pdf
 
-# Donde:
+## 🔍 Donde:
 # - [carrera]: Nombre de la carrera (ej: computacion, fisica, etc.)
 # - [materia]: Nombre de la materia (ej: analisis-matematico-i, sistemas-digitales, etc.)
 # - Los nombres de carpetas deben ser en minúsculas y usar guiones en lugar de espacios
 ```
 
-## Cómo usar este proyecto
+## 🚀 Cómo usar este proyecto
 
-### Opción 1: Configuración directa (recomendado)
+### ⚙️ Opción 1: Configuración directa (recomendado)
 
 1. Haz clic en "Fork" en la esquina superior derecha de esta página para crear tu copia del repositorio.
 
@@ -80,7 +80,7 @@ materias/
 
 5. Habilita GitHub Pages en la configuración de tu repositorio (Settings > Pages).
 
-### Opción 2: Contribuir con mejoras
+### 💡 Opción 2: Contribuir con mejoras
 
 Si deseas contribuir con mejoras al proyecto original:
 
@@ -108,10 +108,10 @@ Si deseas contribuir con mejoras al proyecto original:
    - Describe los cambios realizados y por qué son útiles
    - Haz clic en "Create pull request"
 
-## Despliegue
+## 🚀 Despliegue
 
 El sitio se despliega automáticamente en GitHub Pages cuando se hace push a la rama `main`.
 
-## Licencia
+## 📜 Licencia
 
 MIT
