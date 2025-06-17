@@ -109,13 +109,13 @@ function updateBreadcrumb() {
     
     const parts = currentPath.split('/');
     let breadcrumbHtml = '';
-    let currentPath = '';
+    let pathSoFar = '';
     
     parts.forEach((part, index) => {
         if (!part) return;
-        currentPath = currentPath ? `${currentPath}/${part}` : part;
+        pathSoFar = pathSoFar ? `${pathSoFar}/${part}` : part;
         if (index > 0) breadcrumbHtml += ' / ';
-        breadcrumbHtml += `<button onclick="loadDirectory('${currentPath}')" class="text-blue-500 hover:underline">${part}</button>`;
+        breadcrumbHtml += `<button onclick="loadDirectory('${pathSoFar}')" class="text-blue-500 hover:underline">${part}</button>`;
     });
     
     breadcrumbEl.innerHTML = breadcrumbHtml;
