@@ -1,0 +1,16 @@
+{
+  "name": "exactaswiki",
+  "version": "1.0.0",
+  "description": "Visualizador de PDFs para apuntes de la facultad",
+  "main": "index.js",
+  "scripts": {
+    "build": "tailwindcss -i ./styles.css -o ./dist/output.css --minify",
+    "dev": "tailwindcss -i ./styles.css -o ./dist/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.3.0"
+  }
+}

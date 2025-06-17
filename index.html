@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exactas Wiki</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl font-bold text-blue-600 mb-2">Exactas Wiki</h1>
+            <p class="text-gray-600">Material de estudio organizado por carrera</p>
+        </header>
+
+        <div id="breadcrumbs" class="mb-6 flex items-center text-sm text-gray-600">
+            <button onclick="navigateTo('')" class="text-blue-500 hover:underline">Inicio</button>
+            <span id="breadcrumb-path" class="ml-2"></span>
+        </div>
+
+        <div id="loading" class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p class="mt-2 text-gray-600">Cargando contenido...</p>
+        </div>
+
+        <div id="content" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Content will be loaded here by JavaScript -->
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
