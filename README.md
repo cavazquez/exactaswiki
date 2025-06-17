@@ -19,7 +19,7 @@ Visualizador de apuntes y materiales de estudio organizados por carrera y tipo d
 
 ```
 /
-└── materias/
+└── carreras/
     └── [carrera]/
         └── [materia]/
             ├── 1er-parcial/
@@ -31,7 +31,7 @@ Visualizador de apuntes y materiales de estudio organizados por carrera y tipo d
 
 **📂 Ejemplo de estructura real:**
 ```
-materias/
+carreras/
 └── computacion/
     ├── analisis-matematico-i/
     │   ├── 1er-parcial/
