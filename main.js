@@ -63,25 +63,118 @@ function displayItems(items) {
 // Create HTML for an item card
 function createItemCard(item) {
     const isDir = item.type === 'dir';
-    const icon = isDir ? 'folder' : 'file';
+    const isPdf = item.name.toLowerCase().endsWith('.pdf');
+    
     const clickAction = isDir 
         ? `onclick="loadDirectory('${item.path}')"` 
         : `onclick="window.open('${item.download_url || item.html_url}', '_blank')"`;
     
+    // Generate a unique ID for the PDF container
+    const pdfId = 'pdf-preview-' + Math.random().toString(36).substr(2, 9);
+    
+    // If it's a PDF, we'll load the preview after the element is created
+    if (isPdf) {
+        setTimeout(() => loadPdfPreview(pdfId, item.download_url || item.html_url), 100);
+    }
+    
+    const iconSvg = getIconSvg(isDir ? 'folder' : 'file');
+    
     return `
-        <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow cursor-pointer" ${clickAction}>
-            <div class="p-4 flex items-center">
-                <div class="mr-4 text-blue-500">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        ${getIconSvg(icon)}
-                    </svg>
+        <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 h-full flex flex-col" ${clickAction}>
+            ${isPdf ? `
+                <div id="${pdfId}" class="h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
+                    <div class="text-center p-4">
+                        <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${iconSvg}
+                        </svg>
+                        <p class="mt-2 text-xs text-gray-500">Cargando vista previa...</p>
+                    </div>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 truncate">${item.name}</p>
-                    <p class="text-xs text-gray-500 truncate">${formatDate(item.updated_at)}</p>
+            ` : ''}
+            <div class="p-4 flex-1 flex flex-col">
+                <div class="flex items-start">
+                    ${!isPdf ? `
+                        <div class="mr-3 text-blue-500 mt-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                ${iconSvg}
+                            </svg>
+                        </div>
+                    ` : ''}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 break-words">
+                            ${item.name.replace(/\.\w+$/, '')}
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            ${formatDate(item.updated_at)}
+                            ${!isDir ? ' • ' + formatFileSize(item.size) : ''}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>`;
+}
+
+// Load PDF preview in the given container
+async function loadPdfPreview(containerId, pdfUrl) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    try {
+        // Initialize PDF.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        
+        // Load the PDF
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        const pdf = await loadingTask.promise;
+        
+        // Get the first page
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 0.5 });
+        
+        // Create canvas for the preview
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = 160; // Fixed height for consistency
+        canvas.width = (canvas.height / viewport.height) * viewport.width;
+        
+        // Render PDF page to canvas
+        const renderContext = {
+            canvasContext: context,
+            viewport: page.getViewport({ scale: canvas.width / viewport.width })
+        };
+        
+        await page.render(renderContext).promise;
+        
+        // Clear loading state and show preview
+        container.innerHTML = '';
+        container.appendChild(canvas);
+        
+        // Add a subtle overlay for better text contrast
+        const overlay = document.createElement('div');
+        overlay.className = 'absolute inset-0 bg-gradient-to-t from-black/20 to-transparent';
+        container.appendChild(overlay);
+        
+    } catch (error) {
+        console.error('Error loading PDF preview:', error);
+        container.innerHTML = `
+            <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                <div class="text-center p-4">
+                    <svg class="w-10 h-10 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${getIconSvg('file')}
+                    </svg>
+                    <p class="mt-2 text-xs text-gray-500">No se pudo cargar la vista previa</p>
+                </div>
+            </div>`;
+    }
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
 // Helper function to get SVG icons
