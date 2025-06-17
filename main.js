@@ -20,7 +20,7 @@ function init() {
 async function loadDirectory(path) {
     showLoading(true);
     currentPath = path;
-    updateBreadcrumb();
+    updateBreadcrumb(currentPath);
     
     try {
         const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`;
@@ -101,7 +101,7 @@ function formatDate(dateString) {
 }
 
 // Update breadcrumb navigation
-function updateBreadcrumb() {
+function updateBreadcrumb(currentPath) {
     if (!currentPath) {
         breadcrumbEl.innerHTML = '';
         return;
