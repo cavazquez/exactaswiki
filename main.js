@@ -13,7 +13,7 @@ const breadcrumbEl = document.getElementById('breadcrumb-path');
 
 // Initialize the application
 function init() {
-    loadDirectory('');
+    loadDirectory('materias');
 }
 
 // Load directory contents
