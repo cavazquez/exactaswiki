@@ -36,9 +36,20 @@
             <p class="text-gray-600">Material de estudio organizado por carrera</p>
         </header>
 
-        <div id="breadcrumbs" class="mb-6 flex items-center text-sm text-gray-600">
-            <button onclick="navigateTo('')" class="text-blue-500 hover:underline">Inicio</button>
-            <span id="breadcrumb-path" class="ml-2"></span>
+        <div id="breadcrumbs" class="mb-6 bg-white rounded-lg shadow-sm p-3 border border-gray-200">
+            <nav class="flex items-center text-sm" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="#" onclick="loadDirectory('carreras')" class="inline-flex items-center text-gray-700 hover:text-blue-600">
+                            <svg class="w-4 h-4 mr-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L4 11.414V18a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-6.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+                            </svg>
+                            Inicio
+                        </a>
+                    </li>
+                    <span id="breadcrumb-path" class="ml-2"></span>
+                </ol>
+            </nav>
         </div>
 
         <div id="loading" class="text-center py-8">

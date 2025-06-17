@@ -37,7 +37,7 @@ async function loadDirectory(path) {
         contentEl.innerHTML = `
             <div class="col-span-full text-center py-8">
                 <p class="text-red-500">Error al cargar el directorio: ${error.message}</p>
-                <button onclick="loadDirectory('')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <button onclick="loadDirectory('carreras')" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                     Volver al inicio
                 </button>
             </div>`;
@@ -102,22 +102,40 @@ function formatDate(dateString) {
 
 // Update breadcrumb navigation
 function updateBreadcrumb(currentPath) {
-    if (!currentPath) {
+    if (!breadcrumbEl) return;
+    if (currentPath === '') {
         breadcrumbEl.innerHTML = '';
         return;
     }
-    
-    const parts = currentPath.split('/');
+
     let breadcrumbHtml = '';
+    const parts = currentPath.split('/').filter(part => part !== '');
     let pathSoFar = '';
-    
+
     parts.forEach((part, index) => {
-        if (!part) return;
-        pathSoFar = pathSoFar ? `${pathSoFar}/${part}` : part;
-        if (index > 0) breadcrumbHtml += ' / ';
-        breadcrumbHtml += `<button onclick="loadDirectory('${pathSoFar}')" class="text-blue-500 hover:underline">${part}</button>`;
+        pathSoFar += (pathSoFar ? '/' : '') + part;
+        
+        // Add chevron icon before each part except the first one
+        if (index > 0) {
+            breadcrumbHtml += `
+                <li class="flex items-center">
+                    <svg class="w-3 h-3 text-gray-400 mx-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+                    </svg>
+                    <a href="#" onclick="loadDirectory('${pathSoFar}')" class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2">
+                        ${part}
+                    </a>
+                </li>`;
+        } else {
+            breadcrumbHtml += `
+                <li class="inline-flex items-center">
+                    <a href="#" onclick="loadDirectory('${pathSoFar}')" class="text-sm font-medium text-gray-700 hover:text-blue-600">
+                        ${part}
+                    </a>
+                </li>`;
+        }
     });
-    
+
     breadcrumbEl.innerHTML = breadcrumbHtml;
 }
 
