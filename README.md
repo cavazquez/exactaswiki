@@ -19,13 +19,37 @@ Visualizador de apuntes y materiales de estudio organizados por carrera y tipo d
 
 ```
 /
-├── carrera/
-│   ├── 1er-parcial/
-│   ├── 1er-recuperatorio/
-│   ├── 2do-parcial/
-│   ├── 2do-recuperatorio/
-│   └── finales/
-└── ...
+└── materias/
+    └── [carrera]/
+        └── [materia]/
+            ├── 1er-parcial/
+            ├── 1er-recuperatorio/
+            ├── 2do-parcial/
+            ├── 2do-recuperatorio/
+            └── finales/
+```
+
+**Ejemplo de estructura real:**
+```
+materias/
+└── computacion/
+    ├── analisis-matematico-i/
+    │   ├── 1er-parcial/
+    │   │   └── parcial-2023-04-15.pdf
+    │   ├── 2do-parcial/
+    │   └── finales/
+    │       └── final-2023-07-20.pdf
+    └── sistemas-digitales/
+        ├── 1er-parcial/
+        │   ├── parcial-1-2023-05-10.pdf
+        │   └── parcial-1-2023-05-15.pdf
+        └── 2do-parcial/
+            └── parcial-2-2023-07-05.pdf
+
+# Donde:
+# - [carrera]: Nombre de la carrera (ej: computacion, fisica, etc.)
+# - [materia]: Nombre de la materia (ej: analisis-matematico-i, sistemas-digitales, etc.)
+# - Los nombres de carpetas deben ser en minúsculas y usar guiones en lugar de espacios
 ```
 
 ## Cómo usar este proyecto
