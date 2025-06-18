@@ -60,10 +60,23 @@ function displayItems(items) {
         .join('');
 }
 
+// Mapeo de nombres de carpetas a sus respectivos logos
+const LOGO_MAP = {
+    'compu': 'computacion.png',
+    'fisica': 'fisica.png',
+    'matematica': 'matematica.png',
+    'quimica': 'quimica.png',
+    'biologia': 'biologia.png'
+};
+
+// Base URL para los logos (ajusta según la ubicación de tus logos)
+const LOGOS_BASE_URL = 'https://raw.githubusercontent.com/cavazquez/exactaswiki/main/assets/logos/';
+
 // Create HTML for an item card
 function createItemCard(item) {
     const isDir = item.type === 'dir';
     const isPdf = item.name.toLowerCase().endsWith('.pdf');
+    const isCarrera = isDir && item.path.split('/').length === 2; // Verifica si es una carpeta de primer nivel en carreras/
     
     const clickAction = isDir 
         ? `onclick="loadDirectory('${item.path}')"` 
@@ -78,6 +91,8 @@ function createItemCard(item) {
     }
     
     const iconSvg = getIconSvg(isDir ? 'folder' : 'file');
+    const logoName = LOGO_MAP[item.name.toLowerCase()];
+    const logoUrl = logoName ? `${LOGOS_BASE_URL}${logoName}` : null;
     
     return `
         <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 h-full flex flex-col" ${clickAction}>
@@ -90,10 +105,14 @@ function createItemCard(item) {
                         <p class="mt-2 text-xs text-gray-500">Cargando vista previa...</p>
                     </div>
                 </div>
+            ` : isCarrera && logoUrl ? `
+                <div class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden p-4">
+                    <img src="${logoUrl}" alt="${item.name}" class="max-h-32 max-w-full object-contain">
+                </div>
             ` : ''}
             <div class="p-4 flex-1 flex flex-col">
                 <div class="flex items-start">
-                    ${!isPdf ? `
+                    ${!isPdf && !isCarrera ? `
                         <div class="mr-3 text-blue-500 mt-1">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 ${iconSvg}
