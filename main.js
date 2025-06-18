@@ -60,13 +60,28 @@ function displayItems(items) {
         .join('');
 }
 
-// Mapeo de nombres de carpetas a sus respectivos logos
-const LOGO_MAP = {
-    'compu': 'computacion.png',
-    'fisica': 'fisica.png',
-    'matematica': 'matematica.png',
-    'quimica': 'quimica.png',
-    'biologia': 'biologia.png'
+// Mapeo de nombres de carpetas a sus respectivos logos y nombres completos
+const CARRERAS_INFO = {
+    'compu': {
+        logo: 'computacion.png',
+        nombre: 'Ciencias de la Computación'
+    },
+    'fisica': {
+        logo: 'fisica.png',
+        nombre: 'Física'
+    },
+    'matematica': {
+        logo: 'matematica.png',
+        nombre: 'Matemática'
+    },
+    'quimica': {
+        logo: 'quimica.png',
+        nombre: 'Química'
+    },
+    'biologia': {
+        logo: 'biologia.png',
+        nombre: 'Biología'
+    }
 };
 
 // Base URL para los logos (ajusta según la ubicación de tus logos)
@@ -91,11 +106,18 @@ function createItemCard(item) {
     }
     
     const iconSvg = getIconSvg(isDir ? 'folder' : 'file');
-    const logoName = LOGO_MAP[item.name.toLowerCase()];
-    const logoUrl = logoName ? `${LOGOS_BASE_URL}${logoName}` : null;
+    const carreraInfo = CARRERAS_INFO[item.name.toLowerCase()];
+    const logoUrl = carreraInfo ? `${LOGOS_BASE_URL}${carreraInfo.logo}` : null;
     
     return `
-        <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 h-full flex flex-col" ${clickAction}>
+        <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 h-full flex flex-col relative group" ${clickAction}>
+            ${isCarrera && carreraInfo ? `
+                <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center z-10">
+                    <div class="text-white text-center p-4">
+                        <p class="text-xl font-bold">${carreraInfo.nombre}</p>
+                    </div>
+                </div>
+            ` : ''}
             ${isPdf ? `
                 <div id="${pdfId}" class="h-40 bg-gray-100 flex items-center justify-center overflow-hidden">
                     <div class="text-center p-4">
@@ -110,26 +132,28 @@ function createItemCard(item) {
                     <img src="${logoUrl}" alt="${item.name}" class="max-h-32 max-w-full object-contain">
                 </div>
             ` : ''}
-            <div class="p-4 flex-1 flex flex-col">
-                <div class="flex items-start">
-                    ${!isPdf && !isCarrera ? `
-                        <div class="mr-3 text-blue-500 mt-1">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                ${iconSvg}
-                            </svg>
+            ${!isCarrera ? `
+                <div class="p-4 flex-1 flex flex-col">
+                    <div class="flex items-start">
+                        ${!isPdf ? `
+                            <div class="mr-3 text-blue-500 mt-1">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    ${iconSvg}
+                                </svg>
+                            </div>
+                        ` : ''}
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 break-words">
+                                ${item.name.replace(/\.\w+$/, '')}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                ${formatDate(item.updated_at)}
+                                ${!isDir ? ' • ' + formatFileSize(item.size) : ''}
+                            </p>
                         </div>
-                    ` : ''}
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 break-words">
-                            ${item.name.replace(/\.\w+$/, '')}
-                        </p>
-                        <p class="text-xs text-gray-500 mt-1">
-                            ${formatDate(item.updated_at)}
-                            ${!isDir ? ' • ' + formatFileSize(item.size) : ''}
-                        </p>
                     </div>
                 </div>
-            </div>
+            ` : ''}
         </div>`;
 }
 
