@@ -14,6 +14,12 @@ const breadcrumbEl = document.getElementById('breadcrumb-path');
 // Initialize the application
 function init() {
     loadDirectory('carreras');
+    
+    // Add global error handler for folder downloads
+    window.addEventListener('unhandledrejection', (event) => {
+        console.error('Unhandled rejection:', event.reason);
+        alert(`Error al descargar la carpeta: ${event.reason.message || 'Error desconocido'}`);
+    });
 }
 
 // Load directory contents
@@ -27,6 +33,10 @@ async function loadDirectory(path) {
         const response = await fetch(apiUrl);
         
         if (!response.ok) {
+            // If the path doesn't exist, try with a trailing slash
+            if (response.status === 404 && !path.endsWith('/')) {
+                return loadDirectory(`${path}/`);
+            }
             throw new Error(`Error: ${response.status}`);
         }
         
@@ -87,30 +97,129 @@ const CARRERAS_INFO = {
 // Base URL para los logos (ajusta según la ubicación de tus logos)
 const LOGOS_BASE_URL = 'https://raw.githubusercontent.com/cavazquez/exactaswiki/main/assets/logos/';
 
+// Download a folder as a ZIP file
+async function downloadFolderAsZip(folderPath, folderName) {
+    try {
+        showLoading(true);
+        
+        // Create a new JSZip instance
+        const zip = new JSZip();
+        
+        // Start the recursive process of adding files to the zip
+        await addFolderToZip(zip, folderPath, '');
+        
+        // Generate the zip file
+        const content = await zip.generateAsync({ type: 'blob' });
+        
+        // Create a download link
+        const url = URL.createObjectURL(content);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${folderName}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        
+        // Clean up
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showLoading(false);
+        }, 0);
+        
+    } catch (error) {
+        console.error('Error creating zip file:', error);
+        alert(`Error al crear el archivo ZIP: ${error.message}`);
+        showLoading(false);
+        throw error;
+    }
+}
+
+// Recursively add folder contents to zip
+async function addFolderToZip(zip, folderPath, relativePath) {
+    try {
+        const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${folderPath}?ref=${BRANCH}`;
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            throw new Error(`Error al cargar el directorio: ${response.status}`);
+        }
+        
+        const items = await response.json();
+        
+        // Process each item in the folder
+        for (const item of items) {
+            const itemPath = relativePath ? `${relativePath}/${item.name}` : item.name;
+            
+            if (item.type === 'dir') {
+                // Recursively add subdirectories
+                await addFolderToZip(zip, item.path, itemPath);
+            } else if (item.type === 'file') {
+                // Add files to the zip
+                try {
+                    const fileResponse = await fetch(item.download_url);
+                    if (!fileResponse.ok) throw new Error(`Error al descargar ${item.name}`);
+                    
+                    const fileBlob = await fileResponse.blob();
+                    zip.file(itemPath, fileBlob);
+                } catch (fileError) {
+                    console.error(`Error al procesar el archivo ${item.name}:`, fileError);
+                    // Continue with other files even if one fails
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error adding folder to zip:', error);
+        throw error;
+    }
+}
+
+// Create download button for folders
+function createDownloadButton(path, name) {
+    const button = document.createElement('button');
+    button.className = 'download-folder-btn absolute top-2 right-2 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100';
+    button.title = `Descargar ${name} como ZIP`;
+    button.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+    `;
+    
+    // Prevent event propagation to avoid triggering the folder click
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        downloadFolderAsZip(path, name);
+    });
+    
+    return button;
+}
+
 // Create HTML for an item card
 function createItemCard(item) {
     const isDir = item.type === 'dir';
     const isPdf = item.name.toLowerCase().endsWith('.pdf');
     const isCarrera = isDir && item.path.split('/').length === 2; // Verifica si es una carpeta de primer nivel en carreras/
     
-    const clickAction = isDir 
-        ? `onclick="loadDirectory('${item.path}')"` 
-        : `onclick="window.open('${item.download_url || item.html_url}', '_blank')"`;
+    const iconSvg = getIconSvg(isDir ? 'folder' : 'file');
+    const carreraInfo = isCarrera ? CARRERAS_INFO[item.name.toLowerCase()] : null;
+    const logoUrl = carreraInfo ? `${LOGOS_BASE_URL}${carreraInfo.logo}` : null;
     
     // Generate a unique ID for the PDF container
     const pdfId = 'pdf-preview-' + Math.random().toString(36).substr(2, 9);
     
-    // If it's a PDF, we'll load the preview after the element is created
-    if (isPdf) {
-        setTimeout(() => loadPdfPreview(pdfId, item.download_url || item.html_url), 100);
-    }
-    
-    const iconSvg = getIconSvg(isDir ? 'folder' : 'file');
-    const carreraInfo = CARRERAS_INFO[item.name.toLowerCase()];
-    const logoUrl = carreraInfo ? `${LOGOS_BASE_URL}${carreraInfo.logo}` : null;
-    
-    return `
-        <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 h-full flex flex-col relative group" ${clickAction}>
+    // Create card HTML
+    let cardHTML = `
+        <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow cursor-pointer transform hover:-translate-y-1 h-full flex flex-col relative group" 
+             onclick="${isDir ? `loadDirectory('${item.path}')` : `window.open('${item.download_url || item.html_url}', '_blank')'`}">
+            ${isDir ? `
+                <div class="absolute top-2 right-2">
+                    <button class="download-folder-btn bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100" 
+                            onclick="event.stopPropagation(); downloadFolderAsZip('${item.path}', '${item.name.replace(/'/g, '\'')}')"
+                            title="Descargar ${item.name} como ZIP">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </button>
+                </div>` : ''}
             ${isCarrera && carreraInfo ? `
                 <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center z-10">
                     <div class="text-white text-center p-4">
@@ -128,7 +237,7 @@ function createItemCard(item) {
                     </div>
                 </div>
             ` : isCarrera && logoUrl ? `
-                <div class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden p-4">
+                <div class="h-40 bg-gray-50 flex items-center justify-center overflow-hidden p-4 relative">
                     <img src="${logoUrl}" alt="${item.name}" class="max-h-32 max-w-full object-contain">
                 </div>
             ` : ''}
@@ -155,6 +264,18 @@ function createItemCard(item) {
                 </div>
             ` : ''}
         </div>`;
+        
+    // Load PDF preview after a short delay
+    if (isPdf) {
+        setTimeout(() => {
+            const container = document.getElementById(pdfId);
+            if (container) {
+                loadPdfPreview(pdfId, item.download_url || item.html_url);
+            }
+        }, 100);
+    }
+    
+    return cardHTML;
 }
 
 // Load PDF preview in the given container
